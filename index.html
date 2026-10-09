@@ -1,0 +1,692 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Damir Kanakhov</title>
+<meta name="description" content="Damir Kanakhov — Senior Unity Developer. Gameplay, architecture, performance and multiplayer across PC, mobile and web.">
+<meta property="og:title" content="Damir Kanakhov — Senior Unity Developer">
+<meta property="og:description" content="Senior Unity Developer: gameplay, architecture, performance, multiplayer. Den of Wolves · Frostborn · Welwise Hub.">
+<meta property="og:image" content="img/dow-key.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;800&family=Golos+Text:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: dark-first game-studio showcase. Hero with three game covers, a band of big numbers,
+   then one wide "case" per shipped game (media + gallery + role), open source, toolbox, career, contact. */
+:root {
+  --bg: #0b0d12;
+  --surface: #141821;
+  --surface-2: #1b2130;
+  --fg: #eef1f6;
+  --muted: #8e98ab;
+  --line: #262d3b;
+  --accent: #ffb547;
+  --link: #8fb4ff;
+  --scrim: rgba(6, 8, 12, .86);
+  --f-display: "Unbounded", "Segoe UI", system-ui, sans-serif;
+  --f-body: "Golos Text", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --bg: #f2f3f6; --surface: #ffffff; --surface-2: #e9ecf2; --fg: #11141b; --muted: #5a6274;
+    --line: #d7dbe4; --accent: #b25f00; --link: #2a55c8; --scrim: rgba(15, 18, 26, .82);
+    color-scheme: light;
+  }
+}
+:root[data-theme="light"] {
+  --bg: #f2f3f6; --surface: #ffffff; --surface-2: #e9ecf2; --fg: #11141b; --muted: #5a6274;
+  --line: #d7dbe4; --accent: #b25f00; --link: #2a55c8; --scrim: rgba(15, 18, 26, .82);
+  color-scheme: light;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body {
+  background: var(--bg); color: var(--fg);
+  font-family: var(--f-body); font-size: 16px; line-height: 1.6;
+  margin: 0; padding-inline: 20px; padding-block: 0 56px;
+}
+a { color: var(--link); text-underline-offset: 3px; }
+a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 6px; }
+img, video { max-width: 100%; display: block; }
+.wrap { max-width: 1160px; margin: 0 auto; }
+.mono { font-family: var(--f-mono); }
+.label { font: 500 11.5px/1.3 var(--f-mono); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+
+/* bar */
+.bar {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20;
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  padding-block: 14px; background: var(--bg); border-bottom: 1px solid var(--line);
+}
+.bar .mark { display: inline-flex; align-items: center; gap: 10px; font: 600 14px/1 var(--f-display); letter-spacing: .01em; color: var(--fg); text-decoration: none; }
+.bar .mark img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1.5px solid var(--accent); }
+.bar nav { display: flex; gap: 22px; }
+.bar nav a { color: var(--muted); text-decoration: none; font-size: 14px; }
+.bar nav a:hover { color: var(--fg); }
+.lang { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: 3px; background: var(--surface); }
+.lang button { font: 500 12px/1 var(--f-mono); letter-spacing: .08em; border: 0; cursor: pointer; padding: 7px 12px; border-radius: 999px; background: transparent; color: var(--muted); }
+.lang button[aria-pressed="true"] { background: var(--fg); color: var(--bg); }
+@media (max-width: 820px) { .bar nav { display: none; } }
+
+/* hero */
+.hero { padding-block: 64px 40px; display: grid; gap: 40px; }
+.hero h1 { font: 800 clamp(34px, 5vw, 68px)/.98 var(--f-display); letter-spacing: -.03em; margin: 0; text-wrap: balance; min-width: 0; }
+.hero h1 span { color: var(--accent); }
+.hero-top { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 48px; align-items: end; }
+.player { display: flex; align-items: center; gap: 16px; margin-bottom: 22px; }
+.avatar { position: relative; flex: none; }
+.zoom { border: 0; padding: 0; background: none; cursor: zoom-in; border-radius: 50%; }
+.zoom img { transition: transform .2s; }
+.zoom:hover img { transform: scale(1.05); }
+.me-btn { display: block; margin-bottom: 18px; }
+.avatar img { width: 84px; height: 84px; border-radius: 50%; object-fit: cover; border: 2px solid var(--accent); padding: 3px; background: var(--bg); }
+.avatar::after { content: ""; position: absolute; right: 4px; bottom: 4px; width: 16px; height: 16px; border-radius: 50%; background: #3ccf7a; border: 3px solid var(--bg); }
+.player b { display: block; font: 600 17px/1.25 var(--f-display); }
+.player .st { font: 400 12.5px/1.4 var(--f-mono); color: var(--muted); }
+.player .st::before { content: "● "; color: #3ccf7a; }
+.hero .pitch { font-size: clamp(17px, 1.6vw, 20px); max-width: 46ch; margin: 0; color: var(--fg); }
+.hero .pitch b { color: var(--accent); font-weight: 600; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+.chip { font: 400 12.5px/1 var(--f-mono); padding: 8px 11px; border: 1px solid var(--line); border-radius: 999px; color: var(--muted); }
+.chip.on { color: var(--fg); border-color: var(--accent); }
+.chip.on::before { content: "● "; color: var(--accent); }
+.cta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 24px; }
+.btn { display: inline-flex; align-items: center; gap: 8px; text-decoration: none; font-weight: 600; font-size: 15px; padding: 13px 20px; border-radius: 10px; border: 1px solid var(--line); color: var(--fg); background: var(--surface); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: #17110a; }
+.btn:hover { border-color: var(--fg); }
+@media (max-width: 820px) { .hero-top { grid-template-columns: 1fr; } }
+
+/* covers */
+.covers { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 14px; }
+.cover { position: relative; border-radius: 14px; overflow: hidden; aspect-ratio: 16 / 10; background: var(--surface-2); text-decoration: none; color: #fff; max-width: 100%; }
+.cover img { width: 100%; height: 100%; object-fit: cover; transition: transform .5s ease; }
+.cover:hover img { transform: scale(1.04); }
+.cover .cap { position: absolute; inset: auto 0 0 0; padding: 40px 16px 14px; background: linear-gradient(transparent, rgba(5,7,10,.88)); display: grid; gap: 2px; }
+.cover .cap b { font: 600 17px/1.2 var(--f-display); }
+.cover .cap span { font: 400 12px/1.3 var(--f-mono); color: #d6dbe4; }
+.cover .badge { position: absolute; top: 12px; left: 12px; font: 600 12px/1 var(--f-mono); padding: 7px 9px; border-radius: 6px; background: rgba(5,7,10,.72); color: #ffcf7f; }
+@media (max-width: 820px) { .covers { grid-template-columns: 1fr 1fr; } .covers .cover:first-child { grid-column: 1 / -1; } }
+@media (max-width: 480px) { .covers { grid-template-columns: 1fr; } }
+
+/* numbers */
+.numbers { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-block: 1px solid var(--line); margin-top: 16px; }
+.num { padding: 28px 20px 26px; border-right: 1px solid var(--line); display: grid; gap: 8px; align-content: start; container-type: inline-size; min-width: 0; }
+.num:nth-child(4n) { border-right: 0; }
+.num:nth-child(n+5) { border-top: 1px solid var(--line); }
+.num strong { font: 800 clamp(18px, 19cqi, 56px)/1 var(--f-display); letter-spacing: -.03em; color: var(--accent); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.num strong small { font-size: .42em; font-weight: 600; color: var(--fg); letter-spacing: 0; margin-left: 4px; }
+.num p { margin: 0; font-size: 14.5px; color: var(--muted); max-width: 26ch; }
+@media (max-width: 820px) {
+  .numbers { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .num { border-right: 1px solid var(--line); }
+  .num:nth-child(2n) { border-right: 0; }
+  .num:nth-child(n+3) { border-top: 1px solid var(--line); }
+  .num { padding: 20px 14px 18px; }
+  .num p { font-size: 13.5px; }
+}
+
+/* sections */
+section { padding-block: 72px 0; }
+section, .case, .contact { scroll-margin-top: 84px; }
+.sec-title { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 28px; }
+h2 { font: 600 clamp(26px, 3.4vw, 40px)/1.1 var(--f-display); letter-spacing: -.02em; margin: 0; text-wrap: balance; }
+
+/* cases */
+.cases { display: grid; gap: 64px; }
+.case { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 36px; align-items: start; }
+.case:nth-child(even) .media { order: 2; }
+.media { display: grid; gap: 10px; min-width: 0; }
+.stage { position: relative; aspect-ratio: 16 / 9; border-radius: 14px; overflow: hidden; background: var(--surface-2); max-width: 100%; }
+.stage img, .stage video, .stage iframe { width: 100%; height: 100%; object-fit: cover; border: 0; }
+.play { position: absolute; inset: 0; display: grid; place-items: center; background: linear-gradient(rgba(0,0,0,.05), rgba(0,0,0,.35)); border: 0; cursor: pointer; padding: 0; color: #fff; }
+.play span { display: inline-flex; align-items: center; gap: 10px; font: 600 14px/1 var(--f-body); padding: 14px 20px 14px 16px; border-radius: 999px; background: rgba(5,7,10,.72); backdrop-filter: blur(4px); transition: transform .2s; }
+.play span::before { content: ""; width: 0; height: 0; border-left: 13px solid var(--accent); border-block: 8px solid transparent; }
+.play:hover span { transform: scale(1.05); }
+.thumbs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.thumbs.tall { grid-template-columns: 1.8fr repeat(3, minmax(0, .62fr)); }
+.thumb { border: 0; padding: 0; cursor: zoom-in; border-radius: 10px; overflow: hidden; background: var(--surface-2); aspect-ratio: 16 / 9; max-width: 100%; }
+.thumbs.tall .thumb { aspect-ratio: auto; height: 120px; }
+.thumb img { width: 100%; height: 100%; object-fit: cover; transition: opacity .2s; }
+.thumb:hover img { opacity: .8; }
+.info { display: grid; gap: 14px; min-width: 0; }
+.info .studio { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; }
+.info h3 { font: 800 clamp(28px, 3.4vw, 42px)/1.02 var(--f-display); letter-spacing: -.03em; margin: 0; }
+.info .tag { margin: 0; color: var(--muted); font-size: 16px; }
+.kpis { display: flex; flex-wrap: wrap; gap: 10px; }
+.kpi { padding: 12px 14px; border-radius: 10px; background: var(--surface); border: 1px solid var(--line); display: grid; gap: 2px; min-width: 120px; }
+.kpi b { font: 600 22px/1.1 var(--f-display); color: var(--accent); letter-spacing: -.02em; }
+.kpi span { font-size: 12.5px; color: var(--muted); }
+.built { list-style: none; margin: 4px 0 0; padding: 0; display: grid; gap: 10px; }
+.built li { padding-left: 22px; position: relative; }
+.built li::before { content: ""; position: absolute; left: 2px; top: .62em; width: 10px; height: 2px; background: var(--accent); }
+.stack { display: flex; flex-wrap: wrap; gap: 6px; }
+.stack span { font: 400 12px/1 var(--f-mono); padding: 6px 8px; border-radius: 5px; background: var(--surface-2); color: var(--muted); }
+.links { display: flex; flex-wrap: wrap; gap: 16px; font-size: 14.5px; font-weight: 500; }
+@media (max-width: 900px) {
+  .case { grid-template-columns: 1fr; gap: 22px; }
+  .case:nth-child(even) .media { order: 0; }
+}
+@media (max-width: 480px) { .thumbs.tall .thumb { height: 90px; } }
+
+/* open source */
+.oss { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.repo { display: grid; gap: 10px; align-content: start; padding: 24px; border-radius: 14px; background: var(--surface); border: 1px solid var(--line); text-decoration: none; color: var(--fg); transition: border-color .2s, transform .2s; }
+.repo:hover { border-color: var(--accent); transform: translateY(-2px); }
+.repo .path { font: 400 12.5px/1.4 var(--f-mono); color: var(--muted); overflow-wrap: anywhere; }
+.repo h3 { margin: 0; font: 600 19px/1.25 var(--f-display); letter-spacing: -.01em; }
+.repo p { margin: 0; color: var(--muted); }
+@media (max-width: 760px) { .oss { grid-template-columns: 1fr; } }
+
+/* toolbox */
+.tools { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 28px 32px; }
+.tools h4 { margin: 0 0 10px; font: 600 15px/1.3 var(--f-body); }
+.tools .stack span { font-size: 12.5px; padding: 7px 9px; color: var(--fg); }
+@media (max-width: 900px) { .tools { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 520px) { .tools { grid-template-columns: 1fr; } }
+
+/* career */
+.career { display: grid; border-top: 1px solid var(--line); }
+.job { display: grid; grid-template-columns: 200px minmax(0, 1fr) auto; gap: 20px; padding-block: 18px; border-bottom: 1px solid var(--line); align-items: baseline; }
+.job .yrs { font: 400 13px/1.4 var(--f-mono); color: var(--muted); font-variant-numeric: tabular-nums; }
+.job b { font-weight: 600; }
+.job .game { color: var(--muted); }
+.job .len { font: 400 13px/1.4 var(--f-mono); color: var(--muted); }
+.edu { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; margin-top: 28px; }
+.edu p { margin: 6px 0 0; }
+@media (max-width: 700px) { .job { grid-template-columns: 1fr; gap: 2px; } .edu { grid-template-columns: 1fr; } }
+
+/* contact */
+.contact { margin-top: 72px; padding: clamp(28px, 5vw, 56px); border-radius: 20px; background: var(--surface); border: 1px solid var(--line); display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 36px; }
+.contact h2 { font-size: clamp(28px, 4vw, 48px); }
+.contact h2 span { color: var(--accent); }
+.contact .me { width: 64px; height: 64px; border-radius: 50%; object-fit: cover; border: 2px solid var(--accent); display: block; }
+.contact .sub { color: var(--muted); margin: 14px 0 0; max-width: 40ch; }
+.cts { display: grid; }
+.ct { display: grid; grid-template-columns: 96px minmax(0, 1fr) auto; gap: 14px; align-items: center; padding-block: 13px; border-bottom: 1px solid var(--line); }
+.ct:last-child { border-bottom: 0; }
+.ct .v { font-size: 16px; min-width: 0; overflow-wrap: anywhere; }
+.copy { font: 500 12px/1 var(--f-mono); padding: 8px 10px; border-radius: 6px; border: 1px solid var(--line); background: var(--surface-2); color: var(--fg); cursor: pointer; }
+.copy:hover { border-color: var(--accent); }
+@media (max-width: 820px) { .contact { grid-template-columns: 1fr; } }
+@media (max-width: 460px) { .ct { grid-template-columns: minmax(0, 1fr) auto; } .ct .label { grid-column: 1 / -1; } }
+
+footer { margin-top: 40px; font: 400 12px/1.6 var(--f-mono); color: var(--muted); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+
+/* lightbox */
+.lb { position: fixed; inset: 0; z-index: 50; background: var(--scrim); display: grid; place-items: center; padding: 24px; cursor: zoom-out; }
+.lb img { max-height: 88vh; max-width: min(1400px, 100%); border-radius: 10px; box-shadow: 0 20px 60px rgba(0,0,0,.5); }
+.lb button { position: absolute; top: calc(16px + env(safe-area-inset-top, 0px)); right: 16px; font: 500 13px/1 var(--f-mono); padding: 10px 12px; border-radius: 8px; border: 0; background: rgba(255,255,255,.12); color: #fff; cursor: pointer; }
+
+.pdfv { position: fixed; inset: 0; z-index: 60; background: var(--scrim); overflow-y: auto; padding: calc(64px + env(safe-area-inset-top, 0px)) 16px 32px; }
+.pdfv .pages { display: grid; gap: 16px; justify-items: center; }
+.pdfv canvas { width: min(900px, 100%); height: auto; border-radius: 6px; box-shadow: 0 20px 60px rgba(0,0,0,.5); background: #fff; }
+.pdfv .pdf-bar { position: fixed; top: env(safe-area-inset-top, 0px); left: 0; right: 0; display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 16px; background: var(--scrim); color: #fff; font: 500 13px/1.3 var(--f-mono); }
+.pdfv .pdf-bar button { font: 500 13px/1 var(--f-mono); padding: 10px 12px; border-radius: 8px; border: 0; background: rgba(255,255,255,.14); color: #fff; cursor: pointer; }
+.pdfv .pdf-msg { color: #fff; text-align: center; font: 400 14px/1.5 var(--f-mono); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before { transition: none !important; }
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="bar">
+    <a class="mark" href="#top"><img src="img/damir.jpg" alt="">Damir Kanakhov</a>
+    <nav aria-label="Sections">
+      <a href="#work" data-t="nav.work">Work</a>
+      <a href="#oss" data-t="nav.oss">Open source</a>
+      <a href="#toolbox" data-t="nav.tools">Toolbox</a>
+      <a href="#career" data-t="nav.career">Career</a>
+      <a href="#contact" data-t="nav.contact">Contact</a>
+    </nav>
+    <div class="lang" role="group" aria-label="Language">
+      <button type="button" id="lang-en" data-lang="en" aria-pressed="true">EN</button>
+      <button type="button" id="lang-ru" data-lang="ru" aria-pressed="false">RU</button>
+    </div>
+  </header>
+  <main id="main"></main>
+</div>
+<div class="pdfv" id="pdfv" hidden role="dialog" aria-modal="true" aria-label="CV"><div class="pdf-bar"><span id="pdf-name"></span><button type="button" id="pdf-close">Esc ✕</button></div><div class="pages" id="pdf-pages"></div></div>
+<div class="lb" id="lb" hidden><button type="button" id="lb-close">Esc ✕</button><img id="lb-img" alt=""></div>
+
+<script>
+const GAMES = {
+  dow: {
+    cover: "img/dow-key.jpg", poster: "img/dow-trailer.jpg", yt: "_iSGZ1U5IjQ",
+    gallery: ["img/dow-1.jpg", "img/dow-2.jpg", "img/dow-3.jpg", "img/dow-4.jpg"],
+    links: [["Steam", "https://store.steampowered.com/app/1818140"], ["YouTube", "https://www.youtube.com/watch?v=_iSGZ1U5IjQ"]],
+    stack: ["Gameplay", "FSM", "Pooling & LOD", "FishNet", "PlayFab", "Wwise", "VContainer", "Animancer"],
+  },
+  ww: {
+    cover: "img/ww-key.jpg", poster: "img/ww-key.jpg", video: "media/welwise-trailer.mp4",
+    gallery: ["img/ww-1.jpg", "img/ww-2.jpg", "img/ww-3.jpg", "img/ww-4.jpg"],
+    links: [["welwise-games.online", "https://welwise-games.online/game/1"], ["CrazyGames", "https://www.crazygames.com"]],
+    stack: ["WebGL", "Addressables", "Asset Bundles", "MVP / MVC", "Memory profiling", "SDK", "Editor Tools"],
+  },
+  fb: {
+    cover: "img/fb-key.jpg", poster: "img/fb-trailer.jpg", yt: "s8ajCzomsoA", tall: true,
+    gallery: ["img/fb-1.jpg", "img/fb-2.jpg", "img/fb-3.jpg", "img/fb-4.jpg"],
+    links: [["kefir.games", "https://kefir.games/games/frostborn"], ["YouTube", "https://www.youtube.com/watch?v=s8ajCzomsoA"]],
+    stack: ["Mobile optimization", "Custom shaders", "VFX", "ScriptableObjects", "Firebase", "Unity Ads", "Photon"],
+  },
+};
+
+const C = {
+  en: {
+    title: "Damir Kanakhov — Senior Unity Developer",
+    playerName: "6+ years in game development", status: "Online · open to offers", photoAlt: "Damir Kanakhov",
+    nav: { work: "Work", oss: "Open source", tools: "Toolbox", career: "Career", contact: "Contact" },
+    hero: "Damir Kanakhov<br>Senior <span>Unity</span> Developer",
+    pitch: "Senior Unity developer with <b>6+ years</b> in commercial games on PC, mobile and web: a heist FPS on Steam, a mobile RPG with <b>10M+ installs</b> and a browser game hub. I build gameplay and combat, architecture that survives new features, steady frame rates and small builds, tools for the team, and multiplayer when the game needs it.",
+    chips: [["Astana · GMT+5", false], ["Remote · relocation", false], ["EU/US hours", false]],
+    cta: "Let’s talk", cv: "CV (PDF)",
+    covers: {
+      dow: ["Den of Wolves", "Co-op heist FPS · Steam · 10 Chambers", "From the PAYDAY & GTFO team"],
+      fb: ["Frostborn", "Co-op action RPG · iOS & Android · Kefir", "10M+ installs"],
+      ww: ["Welwise Hub", "Browser game hub · CrazyGames studio", "~1,000 DAU"],
+    },
+    nums: [
+      ["10M+", "", "installs of Frostborn, a game I helped build"],
+      ["60", "fps", "held in scenes with thousands of objects"],
+      ["35→15", "MB", "web build size"],
+      ["−30", "%", "players lost during loading"],
+      ["3×", "", "faster feature delivery after splitting logic and view"],
+      ["~600", "PRs", "merged by a 10–15 person team with no lost work"],
+      ["3", "platforms", "PC (Steam), mobile and web"],
+      ["6+", "years", "in commercial game development"],
+    ],
+    workTitle: "Selected work", workSub: "PC · mobile · web",
+    play: "Play trailer", watch: "Watch on YouTube ↗",
+    cases: {
+      dow: {
+        studio: "10 Chambers", years: "2024 — now", role: "Senior Unity Developer",
+        tag: "A co-op heist FPS from the creators of PAYDAY and GTFO. I work on the Vertical Slice in a team shipping a build every two weeks.",
+        kpis: [["Steam", "platform"], ["60+ fps", "heavy scenes"], ["~600", "PRs, zero lost work"]],
+        built: [
+          "Weapons, melee, traps and interactive props, from feel to synchronization",
+          "Player controller as a 20-state FSM with separate arms and legs, so new moves slot in without rewrites",
+          "Stable 60+ fps in scenes with thousands of objects: pooling, LODs, load distribution and caching",
+          "Damage, healing, burning and intoxication as reusable modules; player saves on PlayFab",
+          "Led the network layer move from Mirror to FishNet with client prediction and lag compensation",
+          "Branch-per-dev Git flow for 10–15 people, ~10 code reviews a week, mentoring a junior",
+        ],
+      },
+      ww: {
+        studio: "Welwise · CrazyGames", years: "2022 — 2024", role: "Unity Developer",
+        tag: "The studio’s browser game hub: players meet across platforms, chat and hop between the studio’s games.",
+        kpis: [["35→15 MB", "web build"], ["−30%", "loading drop-off"], ["3×", "faster features"]],
+        built: [
+          "Cut the web build from 35 to 15 MB by moving content to on-demand Addressables and Asset Bundles",
+          "MVP/MVC in the live codebase: features ship 3× faster with 30% fewer bugs",
+          "Caught a memory leak in testing that could have taken down the whole web platform",
+          "SDK and docs that let outside studios add chat, emotes, customization and a mobile keyboard on their own",
+          "Bot AI, movement controllers, social mini-games and Editor Tools for designers and artists",
+          "Server authority at every step of in-app purchases",
+        ],
+      },
+      fb: {
+        studio: "Kefir", years: "2020 — 2022", role: "Unity Developer",
+        tag: "A co-op survival action RPG for iOS and Android: build a Viking settlement and fight the army of the dead with friends.",
+        kpis: [["10M+", "installs"], ["iOS + Android", "platforms"], ["~200", "configs moved to data"]],
+        built: [
+          "Mobile optimization: simplified game logic and custom shaders to keep the frame rate high",
+          "VFX and particles for game events, from chest opening to magic explosions",
+          "~200 balance configs in ScriptableObjects, live-updated through Firebase",
+          "Unity Ads and AppLovin SDK for monetization and metrics",
+          "Photon client-server refactor and a C# meta-server over SQL joining several Unity servers",
+        ],
+      },
+    },
+    ossTitle: "Open source", ossSub: "github.com/DamirGameDev",
+    oss: [
+      ["Steam Multiplayer Project Template", "MySteamProjectTemplate", "A Unity 6 starter for Steam multiplayer games: FishNet over Steamworks.NET, VContainer, Addressables and URP."],
+      ["Unity WebGL Mobile Keyboard", "UnityWebGLKeyboardModule", "Native mobile keyboard with emoji for Unity WebGL input fields. Born in Welwise Hub."],
+    ],
+    toolsTitle: "Toolbox",
+    tools: [
+      ["Gameplay & architecture", ["Gameplay systems", "Combat", "AI", "FSM", "VContainer", "Zenject", "SOLID", "MVP / MVC", "ECS"]],
+      ["Performance", ["Profiling", "Memory", "Pooling & LOD", "Build size", "DOTS", "Burst", "CPU / GPU"]],
+      ["Look & sound", ["URP", "Shader Graph", "Shaders", "VFX", "Animancer", "DoTween", "Wwise", "UI/UX"]],
+      ["Content & data", ["Addressables", "Asset Bundles", "ScriptableObjects", "Firebase", "PlayFab", "SQL"]],
+      ["Multiplayer", ["FishNet", "Photon", "Mirror", "Netcode", "Steamworks.NET", "Prediction", "Lag compensation"]],
+      ["Team & tooling", ["C#", "Unity 6", "UniTask", "UniRx", "Git", "Jira", "Code review", "Editor Tools"]],
+    ],
+    careerTitle: "Career",
+    jobs: [
+      ["Oct 2024 — now", "Senior Unity Developer", "10 Chambers", "Den of Wolves", "2 yrs"],
+      ["Nov 2022 — Oct 2024", "Unity Developer", "Welwise (CrazyGames)", "Welwise Hub", "2 yrs"],
+      ["Jun 2020 — Nov 2022", "Unity Developer", "Kefir", "Frostborn", "2.5 yrs"],
+    ],
+    eduH: "Education", edu: "Kazan Federal University, 2020<br><span style=\"color:var(--muted)\">Business Informatics</span>",
+    langH: "Languages", langs: "English — B2 (Upper-Intermediate)",
+    contactTitle: "Need a senior <span>Unity</span> developer?",
+    contactSub: "Open to senior roles in gameplay, architecture, performance, tooling and multiplayer. Remote, hybrid or relocation.",
+    copy: "Copy", copied: "Copied",
+    footer: ["© 2026 Damir Kanakhov", "Game art © 10 Chambers, Kefir, Welwise Games"],
+    close: "Close",
+  },
+  ru: {
+    title: "Дамир Канахов — Senior Unity-разработчик",
+    playerName: "6+ лет в геймдеве", status: "В сети · открыт к предложениям", photoAlt: "Дамир Канахов",
+    nav: { work: "Проекты", oss: "Open source", tools: "Стек", career: "Карьера", contact: "Контакты" },
+    hero: "Дамир Канахов<br>Senior <span>Unity</span>-разработчик",
+    pitch: "Senior Unity-разработчик, <b>6+ лет</b> в коммерческих играх на PC, мобайле и web: FPS про ограбления в Steam, мобильная RPG с <b>10M+ установок</b> и браузерный игровой хаб. Делаю геймплей и бой, архитектуру, которая не ломается от новых фич, стабильный FPS и лёгкие билды, инструменты для команды и мультиплеер, когда он нужен игре.",
+    chips: [["Астана · GMT+5", false], ["Удалёнка · релокация", false], ["Часы EU/US", false]],
+    cta: "Написать", cv: "Резюме (PDF)",
+    covers: {
+      dow: ["Den of Wolves", "Кооп-FPS про ограбления · Steam · 10 Chambers", "От авторов PAYDAY и GTFO"],
+      fb: ["Frostborn", "Кооп Action RPG · iOS и Android · Kefir", "10M+ установок"],
+      ww: ["Welwise Hub", "Браузерный игровой хаб · студия CrazyGames", "~1000 DAU"],
+    },
+    nums: [
+      ["10M+", "", "установок у Frostborn, над которым я работал"],
+      ["60", "fps", "в сценах с тысячами объектов"],
+      ["35→15", "МБ", "вес web-билда"],
+      ["−30", "%", "игроков, уходящих на загрузке"],
+      ["3×", "", "быстрее выходят фичи после разделения логики и вида"],
+      ["~600", "PR", "команды из 10–15 человек без потерянной работы"],
+      ["3", "платформы", "PC (Steam), мобайл и web"],
+      ["6+", "лет", "в коммерческом геймдеве"],
+    ],
+    workTitle: "Проекты", workSub: "PC · мобайл · web",
+    play: "Смотреть трейлер", watch: "Открыть на YouTube ↗",
+    cases: {
+      dow: {
+        studio: "10 Chambers", years: "2024 — сейчас", role: "Senior Unity-разработчик",
+        tag: "Кооперативный FPS про ограбления от авторов PAYDAY и GTFO. Работаю над Vertical Slice, билд выходит раз в две недели.",
+        kpis: [["Steam", "платформа"], ["60+ fps", "тяжёлые сцены"], ["~600", "PR без потерь"]],
+        built: [
+          "Оружие, ближний бой, ловушки и интерактивное окружение: от ощущения до синхронизации",
+          "Контроллер игрока на FSM из 20 состояний с раздельными руками и ногами: новые механики добавляются без переписывания",
+          "Стабильные 60+ fps в сценах с тысячами объектов: пулинг, LOD, распределение нагрузки, кэширование",
+          "Урон, лечение, горение и опьянение — переиспользуемые модули; сохранения игрока на PlayFab",
+          "Перевёл сетевой слой с Mirror на FishNet с клиентской предикцией и компенсацией лагов",
+          "Git-процесс «ветка на разработчика» для 10–15 человек, ~10 code review в неделю, менторство",
+        ],
+      },
+      ww: {
+        studio: "Welwise · CrazyGames", years: "2022 — 2024", role: "Unity-разработчик",
+        tag: "Браузерный игровой хаб студии: игроки встречаются с разных платформ, общаются и переходят между играми студии.",
+        kpis: [["35→15 МБ", "web-билд"], ["−30%", "отвал на загрузке"], ["3×", "быстрее фичи"]],
+        built: [
+          "Сократил web-билд с 35 до 15 МБ: контент грузится по требованию через Addressables и Asset Bundles",
+          "MVP/MVC в живом коде: фичи выходят в 3 раза быстрее, багов на 30% меньше",
+          "На тестировании нашёл утечку памяти, которая могла уронить всю web-платформу",
+          "SDK и документация, по которым сторонние студии сами добавляли чат, эмоции, кастомизацию и мобильную клавиатуру",
+          "AI ботов, контроллеры перемещения, социальные мини-игры и Editor Tools для дизайнеров и художников",
+          "Авторитарный сервер на каждом шаге in-app покупок",
+        ],
+      },
+      fb: {
+        studio: "Kefir", years: "2020 — 2022", role: "Unity-разработчик",
+        tag: "Кооперативная Action RPG на выживание для iOS и Android: строишь поселение викингов и с друзьями бьёшься с армией мёртвых.",
+        kpis: [["10M+", "установок"], ["iOS + Android", "платформы"], ["~200", "конфигов в данные"]],
+        built: [
+          "Оптимизация под мобильные устройства: упростил игровую логику и написал свои шейдеры",
+          "VFX и частицы для игровых событий — от открытия сундука до магических взрывов",
+          "~200 конфигов баланса в ScriptableObjects с обновлением через Firebase",
+          "Unity Ads и AppLovin SDK для монетизации и метрик",
+          "Рефакторинг клиент-сервера на Photon и мета-сервер на C# с SQL, объединивший несколько Unity-серверов",
+        ],
+      },
+    },
+    ossTitle: "Open source", ossSub: "github.com/DamirGameDev",
+    oss: [
+      ["Steam Multiplayer Project Template", "MySteamProjectTemplate", "Стартовый шаблон на Unity 6 для мультиплеера в Steam: FishNet поверх Steamworks.NET, VContainer, Addressables и URP."],
+      ["Unity WebGL Mobile Keyboard", "UnityWebGLKeyboardModule", "Нативная мобильная клавиатура с эмодзи для полей ввода в Unity WebGL. Родилась в Welwise Hub."],
+    ],
+    toolsTitle: "Стек",
+    tools: [
+      ["Геймплей и архитектура", ["Игровые системы", "Бой", "AI", "FSM", "VContainer", "Zenject", "SOLID", "MVP / MVC", "ECS"]],
+      ["Производительность", ["Профилирование", "Память", "Пулинг и LOD", "Размер билда", "DOTS", "Burst", "CPU / GPU"]],
+      ["Картинка и звук", ["URP", "Shader Graph", "Шейдеры", "VFX", "Animancer", "DoTween", "Wwise", "UI/UX"]],
+      ["Контент и данные", ["Addressables", "Asset Bundles", "ScriptableObjects", "Firebase", "PlayFab", "SQL"]],
+      ["Мультиплеер", ["FishNet", "Photon", "Mirror", "Netcode", "Steamworks.NET", "Предикция", "Компенсация лагов"]],
+      ["Команда и инструменты", ["C#", "Unity 6", "UniTask", "UniRx", "Git", "Jira", "Code review", "Editor Tools"]],
+    ],
+    careerTitle: "Карьера",
+    jobs: [
+      ["Окт 2024 — сейчас", "Senior Unity-разработчик", "10 Chambers", "Den of Wolves", "2 года"],
+      ["Ноя 2022 — Окт 2024", "Unity-разработчик", "Welwise (CrazyGames)", "Welwise Hub", "2 года"],
+      ["Июн 2020 — Ноя 2022", "Unity-разработчик", "Kefir", "Frostborn", "2,5 года"],
+    ],
+    eduH: "Образование", edu: "Казанский федеральный университет, 2020<br><span style=\"color:var(--muted)\">Бизнес-информатика</span>",
+    langH: "Языки", langs: "Русский — родной · Английский — B2",
+    contactTitle: "Нужен senior <span>Unity</span>-разработчик?",
+    contactSub: "Открыт к senior-позициям: геймплей, архитектура, производительность, инструменты и мультиплеер. Удалёнка, гибрид или релокация.",
+    copy: "Копировать", copied: "Скопировано",
+    footer: ["© 2026 Дамир Канахов", "Арт игр © 10 Chambers, Kefir, Welwise Games"],
+    close: "Закрыть",
+  },
+};
+
+const CONTACTS = [
+  { k: "Email", v: "kanakhovdamir@gmail.com", href: "mailto:kanakhovdamir@gmail.com" },
+  { k: "Telegram", v: "@kanakhovdamir", href: "https://t.me/kanakhovdamir" },
+  { k: "LinkedIn", v: "in/damirgamedev", href: "https://www.linkedin.com/in/damirgamedev" },
+  { k: "GitHub", v: "DamirGameDev", href: "https://github.com/DamirGameDev" },
+];
+const CV = { en: "Damir_Kanakhov_Unity_Developer_EN.pdf", ru: "Damir_Kanakhov_Unity_Developer_RU.pdf" };
+const ORDER = ["dow", "ww", "fb"];
+const FRAMED = (() => { try { return window.self !== window.top; } catch (e) { return true; } })();
+const ext = 'target="_blank" rel="noopener"';
+
+function caseMedia(id, t) {
+  const g = GAMES[id];
+  let stage;
+  if (g.video) {
+    stage = `<video class="lazyplay" src="${g.video}" poster="${g.poster}" controls playsinline preload="none" muted loop></video>`;
+  } else {
+    stage = `<img src="${g.poster}" alt="${t.covers[id][0]} trailer" loading="lazy">
+      <button type="button" class="play" data-yt="${g.yt}" aria-label="${t.play}"><span>${t.play}</span></button>`;
+  }
+  const thumbs = g.gallery.length
+    ? `<div class="thumbs${g.tall ? " tall" : ""}">${g.gallery.map((s, i) => `<button type="button" class="thumb" data-full="${s}" aria-label="${t.covers[id][0]} ${i + 1}"><img src="${s}" alt="" loading="lazy"></button>`).join("")}</div>`
+    : "";
+  return `<div class="media"><div class="stage">${stage}</div>${thumbs}</div>`;
+}
+
+function render(lang) {
+  const t = C[lang];
+  document.title = t.title;
+  document.documentElement.lang = lang;
+  document.querySelectorAll("[data-t]").forEach(el => { const [a, b] = el.dataset.t.split("."); el.textContent = t[a][b]; });
+  document.querySelectorAll(".lang button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.lang === lang)));
+  document.getElementById("lb-close").textContent = "Esc ✕";
+
+  document.getElementById("main").innerHTML = `
+  <div class="hero" id="top">
+    <div class="hero-top">
+      <h1>${t.hero}</h1>
+      <div>
+        <div class="player">
+          <button type="button" class="avatar zoom" data-full="img/damir-full.jpg" aria-label="${t.photoAlt}"><img src="img/damir.jpg" alt="${t.photoAlt}"></button>
+          <span><b>${t.playerName}</b><span class="st">${t.status}</span></span>
+        </div>
+        <p class="pitch">${t.pitch}</p>
+        <div class="chips">${t.chips.map(([c, on]) => `<span class="chip${on ? " on" : ""}">${c}</span>`).join("")}</div>
+        <div class="cta">
+          <a class="btn primary" href="#contact">${t.cta}</a>
+          <a class="btn cv" href="${CV[lang]}" ${ext}>${t.cv} ↗</a>
+        </div>
+      </div>
+    </div>
+    <div class="covers">${ORDER.map(id => `
+      <a class="cover" href="${id === ORDER[0] ? "#work" : "#case-" + id}">
+        <img src="${GAMES[id].cover}" alt="${t.covers[id][0]}">
+        <span class="badge">${t.covers[id][2]}</span>
+        <span class="cap"><b>${t.covers[id][0]}</b><span>${t.covers[id][1]}</span></span>
+      </a>`).join("")}
+    </div>
+  </div>
+
+  <div class="numbers">${t.nums.map(([n, u, p]) => `<div class="num"><strong>${n}${u ? `<small>${u}</small>` : ""}</strong><p>${p}</p></div>`).join("")}</div>
+
+  <section id="work">
+    <div class="sec-title"><h2>${t.workTitle}</h2><span class="label">${t.workSub}</span></div>
+    <div class="cases">${ORDER.map(id => {
+      const c = t.cases[id], g = GAMES[id];
+      return `
+      <article class="case" id="case-${id}">
+        ${caseMedia(id, t)}
+        <div class="info">
+          <div class="studio"><span class="label">${c.studio}</span><span class="label">${c.years}</span></div>
+          <h3>${t.covers[id][0]}</h3>
+          <p class="tag">${c.tag}</p>
+          <div class="kpis">${c.kpis.map(([b, s]) => `<div class="kpi"><b>${b}</b><span>${s}</span></div>`).join("")}</div>
+          <div class="label" style="margin-top:6px">${c.role}</div>
+          <ul class="built">${c.built.map(x => `<li>${x}</li>`).join("")}</ul>
+          <div class="stack">${g.stack.map(s => `<span>${s}</span>`).join("")}</div>
+          <div class="links">${g.links.map(([n, u]) => `<a href="${u}" ${ext}>${n} ↗</a>`).join("")}</div>
+        </div>
+      </article>`; }).join("")}
+    </div>
+  </section>
+
+  <section id="oss">
+    <div class="sec-title"><h2>${t.ossTitle}</h2><a class="label" href="https://github.com/DamirGameDev" ${ext}>${t.ossSub} ↗</a></div>
+    <div class="oss">${t.oss.map(([n, r, d]) => `
+      <a class="repo" href="https://github.com/DamirGameDev/${r}" ${ext}>
+        <span class="path">DamirGameDev / ${r}</span>
+        <h3>${n} ↗</h3>
+        <p>${d}</p>
+      </a>`).join("")}
+    </div>
+  </section>
+
+  <section id="toolbox">
+    <div class="sec-title"><h2>${t.toolsTitle}</h2></div>
+    <div class="tools">${t.tools.map(([h, xs]) => `<div><h4>${h}</h4><div class="stack">${xs.map(x => `<span>${x}</span>`).join("")}</div></div>`).join("")}</div>
+  </section>
+
+  <section id="career">
+    <div class="sec-title"><h2>${t.careerTitle}</h2></div>
+    <div class="career">${t.jobs.map(([y, r, s, g, l]) => `
+      <div class="job"><span class="yrs">${y}</span><span><b>${r}</b> · ${s} <span class="game">— ${g}</span></span><span class="len">${l}</span></div>`).join("")}
+    </div>
+    <div class="edu">
+      <div><span class="label">${t.eduH}</span><p>${t.edu}</p></div>
+      <div><span class="label">${t.langH}</span><p>${t.langs}</p></div>
+    </div>
+  </section>
+
+  <div class="contact" id="contact">
+    <div>
+      <button type="button" class="zoom me-btn" data-full="img/damir-full.jpg" aria-label="${t.photoAlt}"><img class="me" src="img/damir.jpg" alt="${t.photoAlt}"></button>
+      <h2>${t.contactTitle}</h2>
+      <p class="sub">${t.contactSub}</p>
+      <div class="cta"><a class="btn cv" href="${CV.en}" ${ext}>CV · EN ↗</a><a class="btn cv" href="${CV.ru}" ${ext}>CV · RU ↗</a></div>
+    </div>
+    <div class="cts">${CONTACTS.map((c, i) => `
+      <div class="ct">
+        <span class="label">${c.k}</span>
+        <a class="v" href="${c.href}" ${c.href.startsWith("http") ? ext : ""}>${c.v}</a>
+        <button type="button" class="copy" id="copy-${i}" data-v="${c.href.startsWith("mailto") ? c.v : c.href}">${t.copy}</button>
+      </div>`).join("")}
+    </div>
+  </div>
+
+  <footer><span>${t.footer[0]}</span><span>${t.footer[1]}</span></footer>`;
+
+  bind(t);
+}
+
+function bind(t) {
+  document.querySelectorAll(".copy").forEach(btn => btn.addEventListener("click", () => {
+    const done = () => { btn.textContent = t.copied; setTimeout(() => btn.textContent = t.copy, 1400); };
+    const fallback = () => { const r = document.createRange(); r.selectNodeContents(btn.previousElementSibling); const s = getSelection(); s.removeAllRanges(); s.addRange(r); };
+    try { navigator.clipboard.writeText(btn.dataset.v).then(done, fallback); } catch (e) { fallback(); }
+  }));
+  document.querySelectorAll(".play").forEach(b => b.addEventListener("click", () => {
+    const id = b.dataset.yt;
+    if (FRAMED) { window.open("https://www.youtube.com/watch?v=" + id, "_blank", "noopener"); return; }
+    b.parentElement.innerHTML = `<iframe src="https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0" title="Trailer" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>`;
+  }));
+  // inside a sandboxed frame window.open may be refused, so the play button falls back to a real link
+  if (FRAMED) document.querySelectorAll(".play").forEach(b => {
+    const a = document.createElement("a"); a.className = "play"; a.href = "https://www.youtube.com/watch?v=" + b.dataset.yt;
+    a.target = "_blank"; a.rel = "noopener"; a.innerHTML = b.innerHTML; b.replaceWith(a);
+  });
+  document.querySelectorAll(".thumb, .zoom").forEach(b => b.addEventListener("click", () => openLb(b.dataset.full)));
+  // the hub trailer starts muted once it scrolls into view and pauses when it leaves
+  const calm = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (!calm && "IntersectionObserver" in window) {
+    const io = new IntersectionObserver(es => es.forEach(e => {
+      const v = e.target;
+      if (e.isIntersecting) v.play().catch(() => {}); else if (v.muted) v.pause();
+    }), { threshold: .5 });
+    document.querySelectorAll("video.lazyplay").forEach(v => io.observe(v));
+  }
+}
+
+const lb = document.getElementById("lb"), lbImg = document.getElementById("lb-img");
+function openLb(src) { lbImg.src = src; lb.hidden = false; document.getElementById("lb-close").focus(); }
+function closeLb() { lb.hidden = true; lbImg.removeAttribute("src"); }
+lb.addEventListener("click", closeLb);
+addEventListener("keydown", e => { if (e.key === "Escape" && !lb.hidden) closeLb(); });
+
+
+// claude.ai's viewer refuses to open page files in a new tab, so there the CV is drawn in place with pdf.js;
+// on a normal host the link opens the PDF as usual
+const PDFJS = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/";
+let pdfLib = null;
+function loadPdfJs() {
+  if (pdfLib) return pdfLib;
+  pdfLib = new Promise((res, rej) => {
+    const s = document.createElement("script"); s.src = PDFJS + "pdf.min.js";
+    s.onload = () => { window.pdfjsLib.GlobalWorkerOptions.workerSrc = PDFJS + "pdf.worker.min.js"; res(window.pdfjsLib); };
+    s.onerror = rej; document.head.appendChild(s);
+  });
+  return pdfLib;
+}
+const pdfv = document.getElementById("pdfv"), pdfPages = document.getElementById("pdf-pages");
+function closePdf() { pdfv.hidden = true; pdfPages.innerHTML = ""; document.body.style.overflow = ""; }
+async function openPdf(href) {
+  pdfv.hidden = false; document.body.style.overflow = "hidden";
+  document.getElementById("pdf-name").textContent = href;
+  pdfPages.innerHTML = '<p class="pdf-msg">Loading…</p>';
+  document.getElementById("pdf-close").focus();
+  try {
+    const lib = await loadPdfJs();
+    const data = await (await fetch(href)).arrayBuffer();
+    const doc = await lib.getDocument({ data }).promise;
+    pdfPages.innerHTML = "";
+    for (let i = 1; i <= doc.numPages; i++) {
+      const page = await doc.getPage(i), vp = page.getViewport({ scale: 2 });
+      const c = document.createElement("canvas"); c.width = vp.width; c.height = vp.height;
+      pdfPages.appendChild(c);
+      await page.render({ canvasContext: c.getContext("2d"), viewport: vp, intent: "print" }).promise; // print intent skips requestAnimationFrame, which stalls in background tabs
+    }
+  } catch (e) {
+    pdfPages.innerHTML = '<p class="pdf-msg">The CV could not be displayed here. Open the published site to download it.</p>';
+  }
+}
+document.getElementById("pdf-close").addEventListener("click", closePdf);
+pdfv.addEventListener("click", e => { if (e.target === pdfv || e.target === pdfPages) closePdf(); });
+addEventListener("keydown", e => { if (e.key === "Escape" && !pdfv.hidden) closePdf(); });
+document.addEventListener("click", e => {
+  const a = e.target.closest && e.target.closest("a.cv");
+  if (!a || !FRAMED) return;
+  e.preventDefault(); openPdf(a.getAttribute("href"));
+});
+
+function pickLang() {
+  const h = location.hash.replace("#", "");
+  if (h === "en" || h === "ru") return h;
+  try { const s = localStorage.getItem("lang"); if (s === "en" || s === "ru") return s; } catch (e) {}
+  return "en";
+}
+document.querySelectorAll(".lang button").forEach(b => b.addEventListener("click", () => {
+  try { localStorage.setItem("lang", b.dataset.lang); } catch (e) {}
+  render(b.dataset.lang);
+}));
+render(pickLang());
+</script>
+</body>
+</html>
